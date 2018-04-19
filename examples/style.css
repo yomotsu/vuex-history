@@ -1,0 +1,39 @@
+body{
+  font-family: sans-serif;
+}
+button{
+  color: #1ecd97;
+  font-size: 20px;
+  line-height: 30px;
+  cursor: pointer;
+  box-sizing: content-box;
+  width: 120px;
+  height: 30px;
+  padding: 0;
+  margin: 0 auto;
+  border: 2px solid #1ecd97;
+  border-radius: 100px;
+}
+button:hover:not(:disabled){
+  color: #fff;
+  background: #1ecd97;
+}
+button:disabled{
+  color: #ccc;
+  border-color: #ccc;
+  cursor: not-allowed;
+}
+table{
+  border-collapse: collapse;
+}
+table tr:nth-child(even){
+  background: #26A69A;
+}
+table tr:nth-child(odd){
+  background: #80CBC4;
+}
+table th,
+table td{
+  text-align: left;
+  padding: 10px;
+}

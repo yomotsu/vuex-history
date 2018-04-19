@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>=^.^=</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="app"></div>
+This will work even in IE11 if you Babel it.
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.16/vue.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vuex/3.0.1/vuex.min.js"></script>
+<script src="../dist/vuex-history.js"></script>
+<script>
+
+Vue.use( Vuex );
+Vue.use( VuexHistory );
+
+// Vuex
+const store = new Vuex.Store( {
+  state: {
+    myWatchingValue: null,
+    anotherValue: null,
+  },
+  actions: {
+    updateMyWatchingValue: function ( context, myWatchingValue ) {
+
+      context.commit( 'SET_MY_WATCHING_VALUE', myWatchingValue );
+
+    },
+    updateAnotherValue: function ( context, anotherValue ) {
+
+      context.commit( 'SET_ANOTHER_VALUE', anotherValue );
+
+    }
+  },
+  mutations: {
+    SET_MY_WATCHING_VALUE: function ( state, myWatchingValue ) {
+
+      state.myWatchingValue = myWatchingValue;
+
+    },
+    SET_ANOTHER_VALUE: function ( state, anotherValue ) {
+
+      state.anotherValue = anotherValue;
+
+    }
+  }
+} );
+
+
+
+// History
+const maxHistoryLength = 5;
+const watchStateNames = [ 'myWatchingValue' ];
+const hisotry = new VuexHistory( store, watchStateNames, maxHistoryLength );
+
+const hisotryMixin = {
+  computed: {
+    canUndo() {
+      return hisotry.canUndo;
+    },
+    canRedo() {
+      return hisotry.canRedo;
+    },
+  },
+  methods: {
+    clearHistory() {
+      hisotry.clearHistory();
+    },
+    saveSnapshot() {
+      hisotry.saveSnapshot();
+    },
+    undo() {
+      hisotry.undo();
+    },
+    redo() {
+      hisotry.redo();
+    },
+  },
+}
+
+
+
+// Vue
+const mapState = Vuex.mapState;
+const mapActions = Vuex.mapActions;
+
+
+const componentRoot = new Vue( {
+
+  mixins: [ hisotryMixin ],
+
+  store: store,
+
+  data: {
+    tmpMyWatchingValue: null,
+    tmpAnotherValue: null
+  },
+
+  template: `
+    <div>
+
+      <button type="button" @click="undo" :disabled="! canUndo">undo</button>
+      <button type="button" @click="redo" :disabled="! canRedo">redo</button>
+
+      <hr>
+
+      <table>
+        <tr>
+          <th>myWatchingValue<br>will be saved on the end of input stream</th>
+          <td><input type="range" v-model="tmpMyWatchingValue" @blur="saveSnapshot"></td>
+        </tr>
+        <tr>
+          <th>anotherValue<br>(no history managed)</th>
+          <td><input type="range" v-model="tmpAnotherValue"></td>
+        </tr>
+      </table>
+
+      <hr>
+
+      The store
+
+      <table>
+        <tr>
+          <th>myWatchingValue</th>
+          <td>{{ myWatchingValue }}</td>
+        </tr>
+        <tr>
+          <th>anotherValue</th>
+          <td>{{ anotherValue }}</td>
+        </tr>
+      </table>
+    </div>
+  `,
+
+  computed: Object.assign(
+    mapState( [
+      'myWatchingValue',
+      'anotherValue'
+    ] )
+  ),
+
+  watch: {
+    tmpMyWatchingValue: function () {
+      this.updateMyWatchingValue( this.tmpMyWatchingValue );
+    },
+    tmpAnotherValue: function () {
+      this.updateAnotherValue( this.tmpAnotherValue );
+    },
+
+    myWatchingValue: function () {
+      this.tmpMyWatchingValue = this.myWatchingValue;
+    },
+    anotherValue: function () {
+      this.tmpAnotherValue = this.anotherValue;
+    }
+  },
+
+  methods: Object.assign(
+    mapActions( [
+      'updateMyWatchingValue',
+      'updateAnotherValue',
+    ] )
+  )
+
+} );
+
+componentRoot.$mount( '#app' );
+</script>
+
+
+</body>
+</html>
