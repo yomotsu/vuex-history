@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>=^.^=</title>
 <link rel="stylesheet" href="style.css">
 </head>
@@ -79,29 +81,29 @@ const watchStateNames = [
   'myWatchingValue',
   'nested/myNestedWatchingValue'
 ];
-const hisotry = new VuexHistory( store, watchStateNames, maxHistoryLength );
+const vuexHistory = new VuexHistory( store, watchStateNames, maxHistoryLength );
 
 const hisotryMixin = {
   computed: {
     canUndo() {
-      return hisotry.canUndo;
+      return vuexHistory.canUndo;
     },
     canRedo() {
-      return hisotry.canRedo;
+      return vuexHistory.canRedo;
     },
   },
   methods: {
     clearHistory() {
-      hisotry.clearHistory();
+      vuexHistory.clearHistory();
     },
     saveSnapshot() {
-      hisotry.saveSnapshot();
+      vuexHistory.saveSnapshot();
     },
     undo() {
-      hisotry.undo();
+      vuexHistory.undo();
     },
     redo() {
-      hisotry.redo();
+      vuexHistory.redo();
     },
   },
 }
@@ -125,49 +127,49 @@ const componentRoot = new Vue( {
     tmpMyNestedWatchingValue: null
   },
 
-  template: `
-    <div>
+  template: [
+    '<div>',
 
-      <button type="button" @click="undo" :disabled="! canUndo">undo</button>
-      <button type="button" @click="redo" :disabled="! canRedo">redo</button>
+      '<button type="button" @click="undo" :disabled="! canUndo">undo</button>',
+      '<button type="button" @click="redo" :disabled="! canRedo">redo</button>',
 
-      <hr>
+      '<hr>',
 
-      <table>
-        <tr>
-          <th>myWatchingValue<br>will be saved onBlur</th>
-          <td><input type="text" v-model="tmpMyWatchingValue" @blur="saveSnapshot"></td>
-        </tr>
-        <tr>
-          <th>anotherValue<br>(no history managed)</th>
-          <td><input type="range" v-model="tmpAnotherValue"></td>
-        </tr>
-        <tr>
-          <th>myNestedWatchingValue<br>will be saved onChange</th>
-          <td><input type="range" v-model="tmpMyNestedWatchingValue" @change="saveSnapshot"></td>
-        </tr>
-      </table>
+      '<table>',
+        '<tr>',
+          '<th>myWatchingValue<br>will be saved onBlur</th>',
+          '<td><input type="text" v-model="tmpMyWatchingValue" @blur="saveSnapshot"></td>',
+        '</tr>',
+        '<tr>',
+          '<th>anotherValue<br>(no history managed)</th>',
+          '<td><input type="range" v-model="tmpAnotherValue"></td>',
+        '</tr>',
+        '<tr>',
+          '<th>myNestedWatchingValue<br>will be saved onChange</th>',
+          '<td><input type="range" v-model="tmpMyNestedWatchingValue" @change="saveSnapshot"></td>',
+        '</tr>',
+      '</table>',
 
-      <hr>
+      '<hr>',
 
-      The store
+      'The store',
 
-      <table>
-        <tr>
-          <th>myWatchingValue</th>
-          <td>{{ myWatchingValue }}</td>
-        </tr>
-        <tr>
-          <th>anotherValue</th>
-          <td>{{ anotherValue }}</td>
-        </tr>
-        <tr>
-          <th>myNestedWatchingValue</th>
-          <td>{{ myNestedWatchingValue }}</td>
-        </tr>
-      </table>
-    </div>
-  `,
+      '<table>',
+        '<tr>',
+          '<th>myWatchingValue</th>',
+          '<td>{{ myWatchingValue }}</td>',
+        '</tr>',
+        '<tr>',
+          '<th>anotherValue</th>',
+          '<td>{{ anotherValue }}</td>',
+        '</tr>',
+        '<tr>',
+          '<th>myNestedWatchingValue</th>',
+          '<td>{{ myNestedWatchingValue }}</td>',
+        '</tr>',
+      '</table>',
+    '</div>',
+  ].join( '' ),
 
   computed: Object.assign(
     mapState( [

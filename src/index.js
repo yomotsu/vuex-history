@@ -53,8 +53,8 @@ export default class VuexHistory {
 		this.maxHistoryLength = maxHistoryLength;
 
 		// read only
-		Object.defineProperty( this, 'watchStateNames', { value: watchStateNames } );
 		Object.defineProperty( this, 'store', { value: store } );
+		Object.defineProperty( this, 'watchStateNames', { value: watchStateNames } );
 
 		this.clearHistory();
 
@@ -71,7 +71,7 @@ export default class VuexHistory {
 	hasDifferenceFromLatest() {
 
 		const latestHistory = this._vm.history[ this._vm.history.length - 1 ];
-		return ! deepEqual( this.currentWatchingState, latestHistory );
+		return ! deepEqual( this._currentWatchingState, latestHistory );
 
 	}
 
@@ -88,14 +88,14 @@ export default class VuexHistory {
 		// redo可能な履歴を削除
 		this._vm.history.length = this._vm.historyIndex + 1;
 
-		this._vm.history.push( this.currentWatchingState );
+		this._vm.history.push( this._currentWatchingState );
 		this._vm.historyIndex ++;
 
 		// console.log( 'saved', this._vm.history );
 
 	}
 
-	get currentWatchingState() {
+	get _currentWatchingState() {
 
 		const state = deepCopy( this.store.state );
 		const currentWatchingState = {};
@@ -111,11 +111,11 @@ export default class VuexHistory {
 
 	}
 
-	get history() {
+	// get history() {
 
-		return this._vm.$data.history;
+	// 	return this._vm.$data.history;
 
-	}
+	// }
 
 	// 歴史を改変したい時
 	set history( history ) {

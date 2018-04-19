@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>=^.^=</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div id="app"></div>
-This will work even in IE11 if you Babel it.
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.16/vue.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vuex/3.0.1/vuex.min.js"></script>
@@ -54,29 +55,29 @@ const store = new Vuex.Store( {
 // History
 const maxHistoryLength = 5;
 const watchStateNames = [ 'myWatchingValue' ];
-const hisotry = new VuexHistory( store, watchStateNames, maxHistoryLength );
+const vuexHistory = new VuexHistory( store, watchStateNames, maxHistoryLength );
 
 const hisotryMixin = {
   computed: {
     canUndo() {
-      return hisotry.canUndo;
+      return vuexHistory.canUndo;
     },
     canRedo() {
-      return hisotry.canRedo;
+      return vuexHistory.canRedo;
     },
   },
   methods: {
     clearHistory() {
-      hisotry.clearHistory();
+      vuexHistory.clearHistory();
     },
     saveSnapshot() {
-      hisotry.saveSnapshot();
+      vuexHistory.saveSnapshot();
     },
     undo() {
-      hisotry.undo();
+      vuexHistory.undo();
     },
     redo() {
-      hisotry.redo();
+      vuexHistory.redo();
     },
   },
 }
@@ -99,41 +100,41 @@ const componentRoot = new Vue( {
     tmpAnotherValue: null
   },
 
-  template: `
-    <div>
+  template: [
+    '<div>',
 
-      <button type="button" @click="undo" :disabled="! canUndo">undo</button>
-      <button type="button" @click="redo" :disabled="! canRedo">redo</button>
+      '<button type="button" @click="undo" :disabled="! canUndo">undo</button>',
+      '<button type="button" @click="redo" :disabled="! canRedo">redo</button>',
 
-      <hr>
+      '<hr>',
 
-      <table>
-        <tr>
-          <th>myWatchingValue<br>will be saved on the end of input stream</th>
-          <td><input type="range" v-model="tmpMyWatchingValue" @blur="saveSnapshot"></td>
-        </tr>
-        <tr>
-          <th>anotherValue<br>(no history managed)</th>
-          <td><input type="range" v-model="tmpAnotherValue"></td>
-        </tr>
-      </table>
+      '<table>',
+        '<tr>',
+          '<th>myWatchingValue<br>will be saved on the end of input stream</th>',
+          '<td><input type="range" v-model="tmpMyWatchingValue" @blur="saveSnapshot"></td>',
+        '</tr>',
+        '<tr>',
+          '<th>anotherValue<br>(no history managed)</th>',
+          '<td><input type="range" v-model="tmpAnotherValue"></td>',
+        '</tr>',
+      '</table>',
 
-      <hr>
+      '<hr>',
 
-      The store
+      'The store',
 
-      <table>
-        <tr>
-          <th>myWatchingValue</th>
-          <td>{{ myWatchingValue }}</td>
-        </tr>
-        <tr>
-          <th>anotherValue</th>
-          <td>{{ anotherValue }}</td>
-        </tr>
-      </table>
-    </div>
-  `,
+      '<table>',
+        '<tr>',
+          '<th>myWatchingValue</th>',
+          '<td>{{ myWatchingValue }}</td>',
+        '</tr>',
+        '<tr>',
+          '<th>anotherValue</th>',
+          '<td>{{ anotherValue }}</td>',
+        '</tr>',
+      '</table>',
+    '</div>'
+  ].join( '' ),
 
   computed: Object.assign(
     mapState( [
