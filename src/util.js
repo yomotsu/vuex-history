@@ -64,6 +64,26 @@ export function setNestedPropWithString( object, keyString, value ) {
 }
 
 // same one as vuex
+function find ( list, f ) {
+
+	const { length } = list;
+	let index = 0;
+	let value;
+
+	while ( ++ index < length ) {
+
+		value = list[ index ];
+
+		if ( f( value, index, list ) ) {
+
+			return value;
+
+		}
+
+	}
+
+}
+
 export function deepCopy( obj, cache = [] ) {
 
 	// just return if obj is immutable value
