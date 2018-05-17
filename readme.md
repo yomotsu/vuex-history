@@ -4,10 +4,10 @@ undo/redo functionality for Vuex store.
 
 ## Features
 
-- Vue friendly implements.
-- Take states-snapshots manually (You can save a history at desired timing)
-- Watch specific states in the store.
-- You can have multiple history-lists (e.g. history list for main view + history list for side view )
+- Vue friendly.
+- You take state-snapshots manually at desired timings
+- vuex-history watchs specific params in the state of the store.
+- You can have multiple history-lists (e.g. history list for main view + history list for side panel )
 
 
 ## Examples
@@ -17,9 +17,10 @@ undo/redo functionality for Vuex store.
 
 ## Usage
 
-import `vuex-history`, then
-
 ```
+import Vue from 'vue';
+import VuexHistory from 'vuex-history';
+
 Vue.use( VuexHistory );
 
 // make your store with Vuex.
@@ -84,8 +85,8 @@ VuexHistory( store, watchStateNames, maxHistoryLength );
 
 ## Methods
 
-- `.undo()`
-- `.redo()`
-- `.saveSnapshot()`
-- `.clearHistory()`
-- `.hasDifferenceFromLatest()` — return a boolean.
+- `.undo()` — undo.
+- `.redo()` — redo.
+- `.saveSnapshot()` — save snapshot of params of the state.
+- `.clearHistory()` — Clear history list.
+- `.hasDifferenceFromLatest()` — Returns a boolean. Whether there are diff from the latest snapshot or not.
