@@ -17,7 +17,7 @@ undo/redo functionality for Vuex store.
 
 ## Usage
 
-```
+```javascript
 import Vue from 'vue';
 import VuexHistory from 'vuex-history';
 
@@ -28,9 +28,9 @@ const store = new Vuex.Store( {
 	state: {
 		stateA: 0,
 		stateB: 'abc',
-		...
+		//... snip
 	},
-	...
+	//... snip
 } );
 
 // make a history instance with specific state.
@@ -41,7 +41,7 @@ const vuexHistory = new VuexHistory( store, watchStateNames, maxHistoryLength );
 // save snapshots, undo and redo in your component
 // You can also make a mixin. See the examples ↑.
 
-	...
+	//... snip
 	methods: {
 
 		onValueChangeEnd() {
@@ -62,9 +62,9 @@ const vuexHistory = new VuexHistory( store, watchStateNames, maxHistoryLength );
 
 		},
 
-		...
+		//... snip
 	},
-	...
+	//... snip
 ```
 
 ## Constructor
