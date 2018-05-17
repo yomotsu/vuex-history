@@ -68,6 +68,23 @@
 	}
 
 	// same one as vuex
+	function find(list, f) {
+		var length = list.length;
+
+		var index = 0;
+		var value = void 0;
+
+		while (++index < length) {
+
+			value = list[index];
+
+			if (f(value, index, list)) {
+
+				return value;
+			}
+		}
+	}
+
 	function deepCopy(obj) {
 		var cache = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
 
@@ -180,8 +197,8 @@
 			this.maxHistoryLength = maxHistoryLength;
 
 			// read only
-			Object.defineProperty(this, 'watchStateNames', { value: watchStateNames });
 			Object.defineProperty(this, 'store', { value: store });
+			Object.defineProperty(this, 'watchStateNames', { value: watchStateNames });
 
 			this.clearHistory();
 		}
@@ -199,7 +216,7 @@
 			value: function hasDifferenceFromLatest() {
 
 				var latestHistory = this._vm.history[this._vm.history.length - 1];
-				return !deepEqual(this.currentWatchingState, latestHistory);
+				return !deepEqual(this._currentWatchingState, latestHistory);
 			}
 		}, {
 			key: 'saveSnapshot',
@@ -215,7 +232,7 @@
 				// redo可能な履歴を削除
 				this._vm.history.length = this._vm.historyIndex + 1;
 
-				this._vm.history.push(this.currentWatchingState);
+				this._vm.history.push(this._currentWatchingState);
 				this._vm.historyIndex++;
 
 				// console.log( 'saved', this._vm.history );
@@ -259,7 +276,7 @@
 				this.store.replaceState(state);
 			}
 		}, {
-			key: 'currentWatchingState',
+			key: '_currentWatchingState',
 			get: function get() {
 
 				var state = deepCopy(this.store.state);
@@ -273,15 +290,17 @@
 
 				return currentWatchingState;
 			}
-		}, {
-			key: 'history',
-			get: function get() {
 
-				return this._vm.$data.history;
-			}
+			// get history() {
+
+			// 	return this._vm.$data.history;
+
+			// }
 
 			// 歴史を改変したい時
-			,
+
+		}, {
+			key: 'history',
 			set: function set(history) {
 
 				this._vm.$data.history = history;
