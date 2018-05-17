@@ -5,8 +5,8 @@ undo/redo functionality for Vuex store.
 ## Features
 
 - Vue friendly.
-- You take state-snapshots manually at desired timings
-- vuex-history watchs specific params in the state of the store.
+- You can take state-snapshots manually at desired timings
+- vuex-history watches specific params in the state of the store.
 - You can have multiple history-lists (e.g. history list for main view + history list for side panel )
 
 
