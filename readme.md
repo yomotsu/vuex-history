@@ -6,7 +6,7 @@ undo/redo functionality for Vuex store.
 
 - Vue friendly.
 - You can take state-snapshots manually at desired timings
-- vuex-history watches specific params in the state of the store.
+- vuex-history watches specific properties in the state of the store.
 - You can have multiple history-lists (e.g. history list for main view + history list for side panel )
 
 
@@ -26,15 +26,15 @@ Vue.use( VuexHistory );
 // make your store with Vuex.
 const store = new Vuex.Store( {
 	state: {
-		stateA: 0,
-		stateB: 'abc',
+		propA: 0,
+		propB: 'abc',
 		//... snip
 	},
 	//... snip
 } );
 
 // make a history instance with specific state.
-const watchStateNames = [ 'stateA' ];
+const watchStateNames = [ 'propA' ];
 const maxHistoryLength = 50;
 const vuexHistory = new VuexHistory( store, watchStateNames, maxHistoryLength );
 
@@ -74,7 +74,7 @@ VuexHistory( store, watchStateNames, maxHistoryLength );
 ```
 
 - `store` — Vuex store instance.
-- `watchStateNames` — State names in an array. use `'/'` for state in namespaced(nested) modules.
+- `watchStateNames` — property names of the state, in an array. use `'/'` for namespaced(nested) modules.
   e.g. : `[ 'rootParam1' ,'moduleName/paramA' ]`
 - `maxHistoryLength` — Optional. Default is `20`.
 
@@ -87,6 +87,6 @@ VuexHistory( store, watchStateNames, maxHistoryLength );
 
 - `.undo()` — undo.
 - `.redo()` — redo.
-- `.saveSnapshot()` — save snapshot of params of the state.
+- `.saveSnapshot()` — save snapshot of properties of the state.
 - `.clearHistory()` — Clear history list.
 - `.hasDifferenceFromLatest()` — Returns a boolean. Whether there are diff from the latest snapshot or not.
