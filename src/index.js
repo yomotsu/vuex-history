@@ -6,49 +6,23 @@ import {
 	assert,
 } from './util.js';
 
-let Vue; // bind on install
 
 export default class VuexHistory {
 
-	static install( _Vue ) {
-
-		if ( Vue && _Vue === Vue ) {
-
-			if ( process.env.NODE_ENV !== 'production' ) {
-
-				console.error( '[VuexHistory] already installed. Vue.use(VuexHistory) should be called only once.' );
-
-			}
-
-			return;
-
-		}
-
-		Vue = _Vue;
+	static install( app, options ) {
 
 	}
 
 	constructor( store, watchStateNames, maxHistoryLength = 20 ) {
-
-		if ( ! Vue && typeof window !== 'undefined' && window.Vue ) {
-
-			VuexHistory.install( window.Vue );
-
-		}
-
-		if ( typeof process !== 'undefined' && process.env.NODE_ENV !== 'production' ) {
-
-			assert( Vue, `must call Vue.use(VuexHistory) before creating a \`history\` instance.` );
-			assert( this instanceof VuexHistory, `\`history\` must be called with the new operator.` );
-
-		}
-
-		this._vm = new Vue( {
-			data: {
-				history: [],
-				historyIndex: 0,
+		const myapp = Vue.createApp({
+			data() {
+				return {
+					history: [],
+					historyIndex: 0,
+				}
 			},
 		} );
+		this._vm = myapp.mount('#app')
 
 		this.maxHistoryLength = maxHistoryLength;
 

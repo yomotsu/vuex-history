@@ -141,185 +141,157 @@
 		return obj !== Object(obj);
 	}
 
-	function assert(condition, msg) {
-
-		if (!condition) throw new Error('[VueUndoRedo] ' + msg);
-	}
-
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var Vue = void 0; // bind on install
-
 	var VuexHistory = function () {
-		_createClass(VuexHistory, null, [{
-			key: 'install',
-			value: function install(_Vue) {
+			_createClass(VuexHistory, null, [{
+					key: 'install',
+					value: function install(app, options) {}
+			}]);
 
-				if (Vue && _Vue === Vue) {
+			function VuexHistory(store, watchStateNames) {
+					var maxHistoryLength = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 20;
 
-					if (process.env.NODE_ENV !== 'production') {
+					_classCallCheck(this, VuexHistory);
 
-						console.error('[VuexHistory] already installed. Vue.use(VuexHistory) should be called only once.');
+					var myapp = Vue.createApp({
+							data: function data() {
+									return {
+											history: [],
+											historyIndex: 0
+									};
+							}
+					});
+					this._vm = myapp.mount('#app');
+
+					this.maxHistoryLength = maxHistoryLength;
+
+					// read only
+					Object.defineProperty(this, 'store', { value: store });
+					Object.defineProperty(this, 'watchStateNames', { value: watchStateNames });
+
+					this.clearHistory();
+			}
+
+			_createClass(VuexHistory, [{
+					key: 'clearHistory',
+					value: function clearHistory() {
+
+							this._vm.history.length = 0;
+							this._vm.historyIndex = -1;
+							this.saveSnapshot();
+					}
+			}, {
+					key: 'hasDifferenceFromLatest',
+					value: function hasDifferenceFromLatest() {
+
+							var latestHistory = this._vm.history[this._vm.history.length - 1];
+							return !deepEqual(this._currentWatchingState, latestHistory);
+					}
+			}, {
+					key: 'saveSnapshot',
+					value: function saveSnapshot() {
+
+							if (this._vm.history.length > this.maxHistoryLength) {
+
+									this._vm.history.shift();
+									this._vm.historyIndex = this._vm.history.length - 1;
+							}
+
+							// undoした後（redo可能状態）にsnapshoptを保存すると
+							// redo可能な履歴を削除
+							this._vm.history.length = this._vm.historyIndex + 1;
+
+							this._vm.history.push(this._currentWatchingState);
+							this._vm.historyIndex++;
+
+							// console.log( 'saved', this._vm.history );
+					}
+			}, {
+					key: 'undo',
+					value: function undo() {
+
+							if (!this.canUndo) return;
+
+							this._vm.historyIndex--;
+
+							var state = deepCopy(this.store.state);
+							var savedState = deepCopy(this._vm.history[this._vm.historyIndex]);
+
+							this.watchStateNames.forEach(function (stateName) {
+
+									var savedProp = getNestedPropWithString(savedState, stateName);
+									setNestedPropWithString(state, stateName, savedProp);
+							});
+
+							this.store.replaceState(state);
+					}
+			}, {
+					key: 'redo',
+					value: function redo() {
+
+							if (!this.canRedo) return;
+
+							this._vm.historyIndex++;
+
+							var state = deepCopy(this.store.state);
+							var savedState = deepCopy(this._vm.history[this._vm.historyIndex]);
+
+							this.watchStateNames.forEach(function (stateName) {
+
+									var savedProp = getNestedPropWithString(savedState, stateName);
+									setNestedPropWithString(state, stateName, savedProp);
+							});
+
+							this.store.replaceState(state);
+					}
+			}, {
+					key: '_currentWatchingState',
+					get: function get() {
+
+							var state = deepCopy(this.store.state);
+							var currentWatchingState = {};
+
+							this.watchStateNames.forEach(function (stateName) {
+
+									var saveProp = getNestedPropWithString(state, stateName);
+									setNestedPropWithString(currentWatchingState, stateName, saveProp);
+							});
+
+							return currentWatchingState;
 					}
 
-					return;
-				}
+					// get history() {
 
-				Vue = _Vue;
-			}
-		}]);
+					// 	return this._vm.$data.history;
 
-		function VuexHistory(store, watchStateNames) {
-			var maxHistoryLength = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 20;
+					// }
 
-			_classCallCheck(this, VuexHistory);
+					// 歴史を改変したい時
 
-			if (!Vue && typeof window !== 'undefined' && window.Vue) {
+			}, {
+					key: 'history',
+					set: function set(history) {
 
-				VuexHistory.install(window.Vue);
-			}
+							this._vm.$data.history = history;
+					}
+			}, {
+					key: 'canUndo',
+					get: function get() {
 
-			if (typeof process !== 'undefined' && process.env.NODE_ENV !== 'production') {
+							return this._vm.historyIndex > 0;
+					}
+			}, {
+					key: 'canRedo',
+					get: function get() {
 
-				assert(Vue, 'must call Vue.use(VuexHistory) before creating a `history` instance.');
-				assert(this instanceof VuexHistory, '`history` must be called with the new operator.');
-			}
+							return this._vm.historyIndex < this._vm.history.length - 1;
+					}
+			}]);
 
-			this._vm = new Vue({
-				data: {
-					history: [],
-					historyIndex: 0
-				}
-			});
-
-			this.maxHistoryLength = maxHistoryLength;
-
-			// read only
-			Object.defineProperty(this, 'store', { value: store });
-			Object.defineProperty(this, 'watchStateNames', { value: watchStateNames });
-
-			this.clearHistory();
-		}
-
-		_createClass(VuexHistory, [{
-			key: 'clearHistory',
-			value: function clearHistory() {
-
-				this._vm.history.length = 0;
-				this._vm.historyIndex = -1;
-				this.saveSnapshot();
-			}
-		}, {
-			key: 'hasDifferenceFromLatest',
-			value: function hasDifferenceFromLatest() {
-
-				var latestHistory = this._vm.history[this._vm.history.length - 1];
-				return !deepEqual(this._currentWatchingState, latestHistory);
-			}
-		}, {
-			key: 'saveSnapshot',
-			value: function saveSnapshot() {
-
-				if (this._vm.history.length > this.maxHistoryLength) {
-
-					this._vm.history.shift();
-					this._vm.historyIndex = this._vm.history.length - 1;
-				}
-
-				// undoした後（redo可能状態）にsnapshoptを保存すると
-				// redo可能な履歴を削除
-				this._vm.history.length = this._vm.historyIndex + 1;
-
-				this._vm.history.push(this._currentWatchingState);
-				this._vm.historyIndex++;
-
-				// console.log( 'saved', this._vm.history );
-			}
-		}, {
-			key: 'undo',
-			value: function undo() {
-
-				if (!this.canUndo) return;
-
-				this._vm.historyIndex--;
-
-				var state = deepCopy(this.store.state);
-				var savedState = deepCopy(this._vm.history[this._vm.historyIndex]);
-
-				this.watchStateNames.forEach(function (stateName) {
-
-					var savedProp = getNestedPropWithString(savedState, stateName);
-					setNestedPropWithString(state, stateName, savedProp);
-				});
-
-				this.store.replaceState(state);
-			}
-		}, {
-			key: 'redo',
-			value: function redo() {
-
-				if (!this.canRedo) return;
-
-				this._vm.historyIndex++;
-
-				var state = deepCopy(this.store.state);
-				var savedState = deepCopy(this._vm.history[this._vm.historyIndex]);
-
-				this.watchStateNames.forEach(function (stateName) {
-
-					var savedProp = getNestedPropWithString(savedState, stateName);
-					setNestedPropWithString(state, stateName, savedProp);
-				});
-
-				this.store.replaceState(state);
-			}
-		}, {
-			key: '_currentWatchingState',
-			get: function get() {
-
-				var state = deepCopy(this.store.state);
-				var currentWatchingState = {};
-
-				this.watchStateNames.forEach(function (stateName) {
-
-					var saveProp = getNestedPropWithString(state, stateName);
-					setNestedPropWithString(currentWatchingState, stateName, saveProp);
-				});
-
-				return currentWatchingState;
-			}
-
-			// get history() {
-
-			// 	return this._vm.$data.history;
-
-			// }
-
-			// 歴史を改変したい時
-
-		}, {
-			key: 'history',
-			set: function set(history) {
-
-				this._vm.$data.history = history;
-			}
-		}, {
-			key: 'canUndo',
-			get: function get() {
-
-				return this._vm.historyIndex > 0;
-			}
-		}, {
-			key: 'canRedo',
-			get: function get() {
-
-				return this._vm.historyIndex < this._vm.history.length - 1;
-			}
-		}]);
-
-		return VuexHistory;
+			return VuexHistory;
 	}();
 
 	return VuexHistory;
