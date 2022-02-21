@@ -15,6 +15,7 @@
 <script src="../dist/vuex-history.js"></script>
 <script>
 
+VuexHistory.install( Vue );
 
 const mapState = Vuex.mapState;
 const mapActions = Vuex.mapActions;
@@ -105,7 +106,7 @@ const componentRoot = Vue.createApp( {
       '<table>',
         '<tr>',
           '<th>myWatchingValue<br>will be saved on the end of input stream</th>',
-          '<td><input type="range" v-model="tmpMyWatchingValue" @blur="saveSnapshot"></td>',
+          '<td><input type="range" v-model="tmpMyWatchingValue" @change="saveSnapshot"></td>',
         '</tr>',
         '<tr>',
           '<th>anotherValue<br>(no history managed)</th>',
@@ -161,8 +162,8 @@ const componentRoot = Vue.createApp( {
   )
 
 } );
+
 componentRoot.use( store );
-componentRoot.use( VuexHistory);
 componentRoot.mount( '#app' );
 </script>
 

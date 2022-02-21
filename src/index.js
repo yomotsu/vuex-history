@@ -6,24 +6,45 @@ import {
 	assert,
 } from './util.js';
 
+let Vue;
 
 export default class VuexHistory {
 
-	static install( app, options ) {
+	static install( _Vue ) {
+
+		if ( Vue && _Vue === Vue ) {
+
+			if ( process.env.NODE_ENV !== 'production' ) {
+
+				console.error( '[VuexHistory] already installed. Vue.use(VuexHistory) should be called only once.' );
+
+			}
+
+			return;
+
+		}
+
+		Vue = _Vue;
 
 	}
 
 	constructor( store, watchStateNames, maxHistoryLength = 20 ) {
-		const myapp = Vue.createApp({
-			data() {
-				return {
-					history: [],
-					historyIndex: 0,
-				}
-			},
-		} );
-		this._vm = myapp.mount('#app')
 
+		if ( ! Vue && typeof window !== 'undefined' && window.Vue ) {
+
+			VuexHistory.install( window.Vue );
+
+		}
+
+		if ( typeof process !== 'undefined' && process.env.NODE_ENV !== 'production' ) {
+
+			assert( Vue, `must call Vue.use(VuexHistory) before creating a \`history\` instance.` );
+			assert( this instanceof VuexHistory, `\`history\` must be called with the new operator.` );
+
+		}
+
+		this._history = Vue.ref( [] );
+		this._historyIndex = Vue.ref( 0 );
 		this.maxHistoryLength = maxHistoryLength;
 
 		// read only
@@ -36,34 +57,34 @@ export default class VuexHistory {
 
 	clearHistory() {
 
-		this._vm.history.length = 0;
-		this._vm.historyIndex = - 1;
+		this._history.value.length = 0;
+		this._historyIndex.value = - 1;
 		this.saveSnapshot();
 
 	}
 
 	hasDifferenceFromLatest() {
 
-		const latestHistory = this._vm.history[ this._vm.history.length - 1 ];
+		const latestHistory = this._history.value[ this._history.value.length - 1 ];
 		return ! deepEqual( this._currentWatchingState, latestHistory );
 
 	}
 
 	saveSnapshot() {
 
-		if ( this._vm.history.length > this.maxHistoryLength ) {
+		if ( this._history.value.length > this.maxHistoryLength ) {
 
-			this._vm.history.shift();
-			this._vm.historyIndex = this._vm.history.length - 1;
+			this._history.value.shift();
+			this._historyIndex.value = this._history.value.length - 1;
 
 		}
 
 		// undoした後（redo可能状態）にsnapshoptを保存すると
 		// redo可能な履歴を削除
-		this._vm.history.length = this._vm.historyIndex + 1;
+		this._history.value.length = this._historyIndex.value + 1;
 
-		this._vm.history.push( this._currentWatchingState );
-		this._vm.historyIndex ++;
+		this._history.value.push( this._currentWatchingState );
+		this._historyIndex.value ++;
 
 		// console.log( 'saved', this._vm.history );
 
@@ -100,13 +121,13 @@ export default class VuexHistory {
 
 	get canUndo() {
 
-		return this._vm.historyIndex > 0;
+		return this._historyIndex.value > 0;
 
 	}
 
 	get canRedo() {
 
-		return this._vm.historyIndex < this._vm.history.length - 1;
+		return this._historyIndex.value < this._history.value.length - 1;
 
 	}
 
@@ -114,10 +135,10 @@ export default class VuexHistory {
 
 		if ( ! this.canUndo ) return;
 
-		this._vm.historyIndex --;
+		this._historyIndex.value --;
 
 		const state = deepCopy( this.store.state );
-		const savedState = deepCopy( this._vm.history[ this._vm.historyIndex ] );
+		const savedState = deepCopy( this._history.value[ this._historyIndex.value ] );
 
 		this.watchStateNames.forEach( ( stateName ) => {
 
@@ -134,10 +155,10 @@ export default class VuexHistory {
 
 		if ( ! this.canRedo ) return;
 
-		this._vm.historyIndex ++;
+		this._historyIndex.value ++;
 
 		const state = deepCopy( this.store.state );
-		const savedState = deepCopy( this._vm.history[ this._vm.historyIndex ] );
+		const savedState = deepCopy( this._history.value[ this._historyIndex.value ] );
 
 		this.watchStateNames.forEach( ( stateName ) => {
 
