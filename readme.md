@@ -21,7 +21,7 @@ undo/redo functionality for Vuex store.
 import Vue from 'vue';
 import VuexHistory from 'vuex-history';
 
-Vue.use( VuexHistory );
+const componentRoot = Vue.createApp();
 
 // make your store with Vuex.
 const store = new Vuex.Store( {
@@ -37,6 +37,10 @@ const store = new Vuex.Store( {
 const watchStateNames = [ 'propA' ];
 const maxHistoryLength = 50;
 const vuexHistory = new VuexHistory( store, watchStateNames, maxHistoryLength );
+
+componentRoot.use( store );
+componentRoot.use( VuexHistory);
+componentRoot.mount( '#app' );
 
 // save snapshots, undo and redo in your component
 // You can also make a mixin. See the examples ↑.

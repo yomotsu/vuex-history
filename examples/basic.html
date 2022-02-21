@@ -1,24 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>=^.^=</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>=^.^=</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div id="app"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.16/vue.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/vuex/3.0.1/vuex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.2.31/vue.global.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vuex/4.0.2/vuex.global.js"></script>
 <script src="../dist/vuex-history.js"></script>
 <script>
 
-Vue.use( Vuex );
-Vue.use( VuexHistory );
 
-// Vuex
+const mapState = Vuex.mapState;
+const mapActions = Vuex.mapActions;
 const store = new Vuex.Store( {
   state: {
     myWatchingValue: null,
@@ -82,22 +81,17 @@ const hisotryMixin = {
   },
 }
 
-
-
-// Vue
-const mapState = Vuex.mapState;
-const mapActions = Vuex.mapActions;
-
-
-const componentRoot = new Vue( {
+const componentRoot = Vue.createApp( {
 
   mixins: [ hisotryMixin ],
 
   store: store,
 
-  data: {
-    tmpMyWatchingValue: null,
-    tmpAnotherValue: null
+  data() {
+    return {
+      tmpMyWatchingValue: null,
+      tmpAnotherValue: null
+    }
   },
 
   template: [
@@ -167,8 +161,9 @@ const componentRoot = new Vue( {
   )
 
 } );
-
-componentRoot.$mount( '#app' );
+componentRoot.use( store );
+componentRoot.use( VuexHistory);
+componentRoot.mount( '#app' );
 </script>
 
 
