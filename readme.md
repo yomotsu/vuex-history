@@ -13,13 +13,15 @@ undo/redo functionality for Vuex store.
 ## Examples
 
 - [basic](https://yomotsu.github.io/vuex-history/examples/basic.html)
-- [vuex-modules(nested store)](https://yomotsu.github.io/vuex-history/examples/vuex-modules.html)
+<!-- - [vuex-modules(nested store)](https://yomotsu.github.io/vuex-history/examples/vuex-modules.html) -->
 
 ## Usage
 
 ```javascript
 import Vue from 'vue';
 import VuexHistory from 'vuex-history';
+
+VuexHistory.install( Vue );
 
 const componentRoot = Vue.createApp();
 
@@ -39,7 +41,6 @@ const maxHistoryLength = 50;
 const vuexHistory = new VuexHistory( store, watchStateNames, maxHistoryLength );
 
 componentRoot.use( store );
-componentRoot.use( VuexHistory);
 componentRoot.mount( '#app' );
 
 // save snapshots, undo and redo in your component
