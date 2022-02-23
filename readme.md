@@ -4,7 +4,7 @@ undo/redo functionality for Vuex store.
 
 ## Features
 
-- Vue friendly.
+- Vue3 friendly, if you want vue2 support, please use vuex-history@1.0.1.
 - You can take state-snapshots manually at desired timings
 - vuex-history watches specific properties in the state of the store.
 - You can have multiple history-lists (e.g. history list for main view + history list for side panel )
@@ -36,7 +36,7 @@ const store = new Vuex.Store( {
 // make a history instance with specific state.
 const watchStateNames = [ 'propA' ];
 const maxHistoryLength = 50;
-const vuexHistory = new VuexHistory( store, watchStateNames, maxHistoryLength );
+const vuexHistory = VuexHistory.createVuexHistory({store, watchStateNames, maxHistoryLength});
 
 componentRoot.use( store );
 componentRoot.use( VuexHistory);
@@ -50,19 +50,19 @@ componentRoot.mount( '#app' );
 
 		onValueChangeEnd() {
 
-			vuexHistory.saveSnapshot();
+			this.$vuexHistory.saveSnapshot();
 
 		},
 
 		onPressUndoButton() {
 
-			if ( vuexHistory.canUndo ) vuexHistory.undo();
+			if ( this.$vuexHistory.canUndo ) this.$vuexHistory.undo();
 
 		},
 
 		onPressRedoButton() {
 
-			if ( vuexHistory.canRedo ) vuexHistory.redo();
+			if ( this.$vuexHistory.canRedo ) this.$vuexHistory.redo();
 
 		},
 

@@ -1,4 +1,5 @@
-import babel from 'rollup-plugin-babel'
+import typescript from 'rollup-plugin-typescript2';
+
 
 const license = `/*!
  * vuex-history
@@ -7,25 +8,23 @@ const license = `/*!
  * Released under the MIT License.
  */`
 
+const outputConfig = {
+	globals: {
+		vue: 'Vue'
+	}
+}
+
 export default {
-	input: 'src/index.js',
+	input: 'src/index.ts',
+	external: ['vue'],
+
 	output: [
-		{
-			format: 'umd',
-			name: 'VuexHistory',
-			file: 'dist/vuex-history.js',
-			indent: '\t',
-			banner: license
-		},
-		{
-			format: 'es',
-			file: 'dist/vuex-history.module.js',
-			indent: '\t',
-			banner: license
-		}
+		{ file: 'dist/vuex-history.iife.js', name: 'VuexHistory', format: 'iife', browser: true, transpile: false, ...outputConfig },
+		{ file: 'dist/vuex-history.cjs.js', name: 'VuexHistory', format: 'cjs', browser: true, ...outputConfig },
+		{ file: 'dist/vuex-history.esm-browser.js', name: 'VuexHistory', format: 'es', browser: true, ...outputConfig },
+		{ file: 'dist/vuex-history.esm-bundler.js', name: 'VuexHistory', format: 'es', ...outputConfig },
 	],
-	// sourceMap: false,
 	plugins: [
-		babel( { exclude: 'node_modules/**' } )
+		typescript()
 	]
 };

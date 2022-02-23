@@ -8,164 +8,135 @@
 </head>
 <body>
 
+
+
 <div id="app"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.2.31/vue.global.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vuex/4.0.2/vuex.global.js"></script>
-<script src="../dist/vuex-history.js"></script>
+<script src="../dist/vuex-history.iife.js"></script>
 <script>
 
+    const store = new Vuex.Store( {
+        state: {
+            myWatchingValue: null,
+            anotherValue: null,
+        },
+        actions: {
+            updateMyWatchingValue: function ( context, myWatchingValue ) {
 
-const mapState = Vuex.mapState;
-const mapActions = Vuex.mapActions;
-const store = new Vuex.Store( {
-  state: {
-    myWatchingValue: null,
-    anotherValue: null,
-  },
-  actions: {
-    updateMyWatchingValue: function ( context, myWatchingValue ) {
+                context.commit( 'SET_MY_WATCHING_VALUE', myWatchingValue );
 
-      context.commit( 'SET_MY_WATCHING_VALUE', myWatchingValue );
+            },
+            updateAnotherValue: function ( context, anotherValue ) {
 
-    },
-    updateAnotherValue: function ( context, anotherValue ) {
+                context.commit( 'SET_ANOTHER_VALUE', anotherValue );
 
-      context.commit( 'SET_ANOTHER_VALUE', anotherValue );
+            }
+        },
+        mutations: {
+            SET_MY_WATCHING_VALUE: function ( state, myWatchingValue ) {
 
-    }
-  },
-  mutations: {
-    SET_MY_WATCHING_VALUE: function ( state, myWatchingValue ) {
+                state.myWatchingValue = myWatchingValue;
 
-      state.myWatchingValue = myWatchingValue;
+            },
+            SET_ANOTHER_VALUE: function ( state, anotherValue ) {
 
-    },
-    SET_ANOTHER_VALUE: function ( state, anotherValue ) {
+                state.anotherValue = anotherValue;
 
-      state.anotherValue = anotherValue;
+            }
+        }
+    } );
+    const maxHistoryLength = 5;
+    const watchStateNames = [ 'myWatchingValue' ];
+    const vuexHistory = VuexHistory.createVuexHistory({store, maxHistoryLength, watchStateNames});
 
-    }
-  }
-} );
+    const componentRoot = Vue.createApp({
+        store: store,
 
+        data() {
+            return {
+                tmpMyWatchingValue: null,
+                tmpAnotherValue: null
+            }
+        },
 
+        template: [
+            '<div>',
 
-// History
-const maxHistoryLength = 5;
-const watchStateNames = [ 'myWatchingValue' ];
-const vuexHistory = new VuexHistory( store, watchStateNames, maxHistoryLength );
+            '<button type="button" @click="() => this.$vuexHistory.undo()" :disabled="!this.$vuexHistory.canUndo.value">undo</button>',
+            '<button type="button" @click="() => this.$vuexHistory.redo()" :disabled="!this.$vuexHistory.canRedo.value">redo</button>',
 
-const hisotryMixin = {
-  computed: {
-    canUndo() {
-      return vuexHistory.canUndo;
-    },
-    canRedo() {
-      return vuexHistory.canRedo;
-    },
-  },
-  methods: {
-    clearHistory() {
-      vuexHistory.clearHistory();
-    },
-    saveSnapshot() {
-      vuexHistory.saveSnapshot();
-    },
-    undo() {
-      vuexHistory.undo();
-    },
-    redo() {
-      vuexHistory.redo();
-    },
-  },
-}
+            '<hr>',
 
-const componentRoot = Vue.createApp( {
+            '<table>',
+            '<tr>',
+            '<th>myWatchingValue<br>will be saved on the end of input stream</th>',
+            '<td><input type="range" v-model="tmpMyWatchingValue" @blur="() => this.$vuexHistory.saveSnapshot()"></td>',
+            '</tr>',
+            '<tr>',
+            '<th>anotherValue<br>(no history managed)</th>',
+            '<td><input type="range" v-model="tmpAnotherValue"></td>',
+            '</tr>',
+            '</table>',
 
-  mixins: [ hisotryMixin ],
+            '<hr>',
 
-  store: store,
+            'The store',
 
-  data() {
-    return {
-      tmpMyWatchingValue: null,
-      tmpAnotherValue: null
-    }
-  },
+            '<table>',
+            '<tr>',
+            '<th>myWatchingValue</th>',
+            '<td>{{ myWatchingValue }}</td>',
+            '</tr>',
+            '<tr>',
+            '<th>anotherValue</th>',
+            '<td>{{ anotherValue }}</td>',
+            '</tr>',
+            '</table>',
+            '</div>'
+        ].join( '' ),
 
-  template: [
-    '<div>',
+        computed: Object.assign(
+            Vuex.mapState( [
+                'myWatchingValue',
+                'anotherValue'
+            ] )
+        ),
 
-      '<button type="button" @click="undo" :disabled="! canUndo">undo</button>',
-      '<button type="button" @click="redo" :disabled="! canRedo">redo</button>',
+        watch: {
+            tmpMyWatchingValue: function () {
+                this.updateMyWatchingValue( this.tmpMyWatchingValue );
+            },
+            tmpAnotherValue: function () {
+                this.updateAnotherValue( this.tmpAnotherValue );
+            },
 
-      '<hr>',
+            myWatchingValue: function () {
+                this.tmpMyWatchingValue = this.myWatchingValue;
+            },
+            anotherValue: function () {
+                this.tmpAnotherValue = this.anotherValue;
+            }
+        },
 
-      '<table>',
-        '<tr>',
-          '<th>myWatchingValue<br>will be saved on the end of input stream</th>',
-          '<td><input type="range" v-model="tmpMyWatchingValue" @blur="saveSnapshot"></td>',
-        '</tr>',
-        '<tr>',
-          '<th>anotherValue<br>(no history managed)</th>',
-          '<td><input type="range" v-model="tmpAnotherValue"></td>',
-        '</tr>',
-      '</table>',
+        methods: Object.assign(
+            Vuex.mapActions( [
+                'updateMyWatchingValue',
+                'updateAnotherValue',
+            ] )
+        ),
 
-      '<hr>',
+        mounted() {
+            this.updateMyWatchingValue(50);
+            this.updateAnotherValue(50);
+            this.$vuexHistory.saveSnapshot()
+        }
+    });
+    componentRoot.use( store );
+    componentRoot.use( vuexHistory);
+    componentRoot.mount( '#app' );
 
-      'The store',
-
-      '<table>',
-        '<tr>',
-          '<th>myWatchingValue</th>',
-          '<td>{{ myWatchingValue }}</td>',
-        '</tr>',
-        '<tr>',
-          '<th>anotherValue</th>',
-          '<td>{{ anotherValue }}</td>',
-        '</tr>',
-      '</table>',
-    '</div>'
-  ].join( '' ),
-
-  computed: Object.assign(
-    mapState( [
-      'myWatchingValue',
-      'anotherValue'
-    ] )
-  ),
-
-  watch: {
-    tmpMyWatchingValue: function () {
-      this.updateMyWatchingValue( this.tmpMyWatchingValue );
-    },
-    tmpAnotherValue: function () {
-      this.updateAnotherValue( this.tmpAnotherValue );
-    },
-
-    myWatchingValue: function () {
-      this.tmpMyWatchingValue = this.myWatchingValue;
-    },
-    anotherValue: function () {
-      this.tmpAnotherValue = this.anotherValue;
-    }
-  },
-
-  methods: Object.assign(
-    mapActions( [
-      'updateMyWatchingValue',
-      'updateAnotherValue',
-    ] )
-  )
-
-} );
-componentRoot.use( store );
-componentRoot.use( VuexHistory);
-componentRoot.mount( '#app' );
 </script>
 
-
 </body>
-</html>

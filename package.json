@@ -1,25 +1,33 @@
 {
   "name": "vuex-history",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "author": "Yomotsu",
   "license": "MIT",
-  "main": "dist/vuex-history.js",
+  "main": "dist/vuex-history.cjs.js",
+  "exports": {
+    ".": {
+      "module": "./dist/vuex-history.esm-bundler.js",
+      "require": "./dist/vuex-history.cjs.js"
+    },
+    "./": "./"
+  },
+  "module": "dist/vuex-history.esm-bundler.js",
+  "browser": "dist/vuex-history.esm-browser.js",
   "repository": "yomotsu/vuex-history",
-  "jsnext:main": "dist/vuex-history.module.js",
-  "module": "dist/vuex-history.module.js",
   "devDependencies": {
-    "babel-core": "^6.26.3",
-    "babel-preset-env": "1.7.0",
     "rollup": "^0.59.1",
-    "rollup-plugin-babel": "3.0.4",
+    "rollup-plugin-typescript2": "^0.31.2",
     "rollup-watch": "^4.3.1",
-    "uglify-js": "^3.3.25"
+    "typescript": "^4.5.5",
+    "uglify-js": "^3.3.25",
+    "vue": "^3.2.31",
+    "vuex": "^4.0.2"
   },
   "scripts": {
     "dev": "npm run watch",
     "watch": "rollup --config --watch",
     "build": "rollup --config",
-    "release": "rollup --config && uglifyjs dist/vuex-history.js -cm --preamble \"/*!\n * vuex-history\n * https://github.com/yomotsu/vuex-history\n * (c) 2018 @yomotsu\n * Released under the MIT License.\n */\" > dist/vuex-history.min.js"
+    "release": "rollup --config && uglifyjs dist/vuex-history.js -cm > dist/vuex-history.min.js"
   },
   "keywords": [
     "vue",
@@ -28,5 +36,6 @@
     "history",
     "undo",
     "redo"
-  ]
+  ],
+  "dependencies": {}
 }
